@@ -1,10 +1,7 @@
-//
-// Created by 79177 on 02.12.2022.
-//
-
 #ifndef PROJECT_BALL_H
 #define PROJECT_BALL_H
 
+// Just a Ball structure, nothing to say there
 struct Ball{
     float x,y;
     float vx, vy;

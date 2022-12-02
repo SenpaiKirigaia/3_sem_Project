@@ -5,6 +5,7 @@ using namespace std;
 
 
 int main() {
+    // My simple test for collision before we have any graphic interface
     Update_Function game;
     game.Add_Ball(50, 100, 5, 10, 0);
     game.Add_Ball(150, 100, 5, -20, 0);
