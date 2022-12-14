@@ -1,3 +1,4 @@
+#include <utility>
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -22,13 +23,15 @@ bool operator== (const Ball& left, const Ball& right)
 class Update_Function final {
 public:
     // Creating vector that'll hold all data about balls
-    vector<Ball> vector_of_balls;
+    vector<Ball> vector_of_balls{};
 
     // May be set to some number or to amount of FPS,doesn't matter
     const float dt = 1;
 
     // coordinates of points for creating box in format: x1, y1, x2, y2
     const vector<float> box{0, 0, 200, 200};
+
+    //Update_Function(vector<float> box, float dt): box(std::move(box)), dt(dt){}
 
     // Creating circle then adding it to vector of data
     void Add_Ball(float x, float y, float r = 5.0, float vx = 0, float vy = 0) {
