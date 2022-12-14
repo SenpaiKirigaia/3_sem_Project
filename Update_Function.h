@@ -1,7 +1,8 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
-
+#include <random>
+#include <chrono>
 #include "Ball.h"
 
 using namespace std;
@@ -37,36 +38,62 @@ public:
         // ID is used for identifying each ball
         // Also it is conveniently similar to the position of the ball in the vector
         // So we can call vector_of_balls[some_ball.id] and find data about some ball, or change it
-        ball.id = vector_of_balls.size();
+        ball.id = vector_of_balls.size(); // NOLINT(cppcoreguidelines-narrowing-conversions)
         vector_of_balls.emplace_back(ball);
     }
 
+    void Create_Pool(int n = 1, float r = 5, bool need_speed = false,  float v_modulus = 5){
+        for (int i = 0; i < n; i++){
+            mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+            float x = uniform_real_distribution<float>(box[0] + r, box[2] - r)(rng);
+            float y = uniform_real_distribution<float>(box[1] + r, box[3] - r )(rng);
+            if (Pool_Collision(x, y, r)){
+                i -= 1;
+                continue;
+            }
+            if (need_speed) {
+                float vx = uniform_real_distribution<float>(0, v_modulus)(rng) - v_modulus;
+                float vy = uniform_real_distribution<float>(0, v_modulus)(rng) - v_modulus;
+                Add_Ball(x, y, r, vx, vy);
+            } else Add_Ball(x, y, r);
+
+        }
+
+    }
+
+    bool Pool_Collision(float x, float y, float r) const{
+        for(auto &ball: vector_of_balls){ // NOLINT This shit wanned me to use any_of and I do not like it
+            if(sqrtf((ball.x - x)*(ball.x - x) + (ball.y - y)*(ball.y - y)) <= ball.radius + r){
+                return true;
+            }
+        }
+        return false;
+    }
     // Function used for updating position of each ball.
     // On each call it moves ball 3 time, so we can divide our dt by 3, or smt like that.
     // Why is it so? because I wanted consistency. After colliding with the wall we need to move
     // ball for it not to end up on the other place of the wall, same thing with collisions between balls
     void Update_Balls() {
         for (auto &ball: vector_of_balls) {
-            Ball *pBall = &ball;
             // Usual stuff, updating everything
-            pBall->ax = 0; pBall->ay = 0; // definitely can change that if needed
-            pBall->vx += pBall->ax * dt; pBall->vy += pBall->ay * dt;
-            pBall->x += pBall->vx * dt; pBall->y += pBall->vy * dt;
+            ball.ax = 0; ball.ay = 0; // definitely can change that if needed
+            ball.vx += ball.ax * dt; ball.vy += ball.ay * dt;
+            ball.x += ball.vx * dt; ball.y += ball.vy * dt;
 
             // Next we'll check whether ball collided with the box or not
             // See Collision_With_Box description
             Collision_With_Box(ball);
 
-            pBall->x += pBall->vx * dt;
-            pBall->y += pBall->vy * dt;
+            ball.x += ball.vx * dt;
+            ball.y += ball.vy * dt;
+
         }
         Collision_With_Balls();
 
         for (auto &ball: vector_of_balls) {
-            Ball *pBall = &ball;
+            ball.x += ball.vx * dt;
+            ball.y += ball.vy * dt;
 
-            pBall->x += pBall->vx * dt;
-            pBall->y += pBall->vy * dt;
         }
     }
 
@@ -74,13 +101,11 @@ public:
 
     // But that is for now, because I want to implement continuous collision detection (google it)
     void Collision_With_Box(Ball &ball) {
-
-        Ball *pBall = &ball;
-        if (pBall->x - pBall->radius <= box[0] or pBall->x + pBall->radius >= box[2]) {
-            pBall->vx = -pBall->vx;
+        if (ball.x - ball.radius <= box[0] or ball.x + ball.radius >= box[2]) {
+            ball.vx = -ball.vx;
         }
-        if (pBall->y - pBall->radius <= box[1] or pBall->y + pBall->radius >= box[3]) {
-            pBall->vy = -pBall->vy;
+        if (ball.y - ball.radius <= box[1] or ball.y + ball.radius >= box[3]) {
+            ball.vy = -ball.vy;
         }
     }
 
@@ -163,10 +188,5 @@ public:
 
         return possible_collisions;
     }
-
-
-
-
-
 };
 
