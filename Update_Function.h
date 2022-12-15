@@ -31,7 +31,7 @@ public:
     // coordinates of points for creating box in format: x1, y1, x2, y2
     const vector<float> box{0, 0, 200, 200};
 
-    //Update_Function(vector<float> box, float dt): box(std::move(box)), dt(dt){}
+    Update_Function(vector<float> box, float dt): box((box)), dt(dt){}
 
     // Creating circle then adding it to vector of data
     void Add_Ball(float x, float y, float r = 5.0, float vx = 0, float vy = 0) {
@@ -45,7 +45,7 @@ public:
         vector_of_balls.emplace_back(ball);
     }
 
-    void Create_Pool(int n = 1, float r = 5, bool need_speed = false,  float v_modulus = 5){
+    void Create_Pool(int n = 1, float r = 5, bool need_speed = false,  float v_modulus = 0){
         for (int i = 0; i < n; i++){
             mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
             float x = uniform_real_distribution<float>(box[0] + r, box[2] - r)(rng);
@@ -55,8 +55,8 @@ public:
                 continue;
             }
             if (need_speed) {
-                float vx = uniform_real_distribution<float>(0, v_modulus)(rng) - v_modulus;
-                float vy = uniform_real_distribution<float>(0, v_modulus)(rng) - v_modulus;
+                float vx = uniform_real_distribution<float>(0, 2*v_modulus)(rng) - v_modulus;
+                float vy = uniform_real_distribution<float>(0, 2*v_modulus)(rng) - v_modulus;
                 Add_Ball(x, y, r, vx, vy);
             } else Add_Ball(x, y, r);
 
